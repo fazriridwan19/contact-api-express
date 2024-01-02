@@ -117,3 +117,112 @@ describe("POST /api/users/login", () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe("GET /api/users/current", () => {
+  beforeEach(async () => {
+    await prismaClient.user.create({
+      data: {
+        username: "fazri",
+        password: await bcrypt.hash("fazri", 10),
+        name: "Fazri Ridwan",
+        token: "test",
+      },
+    });
+  });
+  afterEach(async () => {
+    await prismaClient.user.deleteMany({
+      where: {
+        username: "fazri",
+      },
+    });
+  });
+  it("should can get current user", async () => {
+    const result = await supertest(web)
+      .get("/api/users/current")
+      .set("Authorization", "test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.username).toBe("fazri");
+    expect(result.body.data.name).toBe("Fazri Ridwan");
+  });
+  it("should reject if token invalid", async () => {
+    const result = await supertest(web)
+      .get("/api/users/current")
+      .set("Authorization", "salah");
+
+    expect(result.status).toBe(401);
+    expect(result.body.errors).toBeDefined();
+  });
+});
+
+describe("PATCH /api/users/current", () => {
+  beforeEach(async () => {
+    await prismaClient.user.create({
+      data: {
+        username: "fazri",
+        password: await bcrypt.hash("fazri", 10),
+        name: "Fazri Ridwan",
+        token: "test",
+      },
+    });
+  });
+  afterEach(async () => {
+    await prismaClient.user.deleteMany({
+      where: {
+        username: "fazri",
+      },
+    });
+  });
+  it("should can update current user", async () => {
+    const result = await supertest(web)
+      .patch("/api/users/current")
+      .set("Authorization", "test")
+      .send({
+        name: "Fazri Updated",
+        password: "fazri123",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.username).toBe("fazri");
+    expect(result.body.data.name).toBe("Fazri Updated");
+
+    const user = await prismaClient.user.findUnique({
+      where: {
+        username: "fazri",
+      },
+    });
+    logger.info(user);
+    expect(await bcrypt.compare("fazri123", user.password)).toBe(true);
+  });
+  it("should can update current user name", async () => {
+    const result = await supertest(web)
+      .patch("/api/users/current")
+      .set("Authorization", "test")
+      .send({
+        name: "Fazri Updated",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.username).toBe("fazri");
+    expect(result.body.data.name).toBe("Fazri Updated");
+  });
+  it("should can update current user password", async () => {
+    const result = await supertest(web)
+      .patch("/api/users/current")
+      .set("Authorization", "test")
+      .send({
+        password: "fazri123",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.username).toBe("fazri");
+    expect(result.body.data.name).toBe("Fazri Ridwan");
+
+    const user = await prismaClient.user.findUnique({
+      where: {
+        username: "fazri",
+      },
+    });
+    expect(await bcrypt.compare("fazri123", user.password)).toBe(true);
+  });
+});
