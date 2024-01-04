@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "start": "node src/main.js",
-    "test": "jest -i"
+    "test-user": "jest -i test/user.test.js",
+    "test-contact": "jest -i test/contact.test.js"
   },
   "jest": {
     "transform": {
