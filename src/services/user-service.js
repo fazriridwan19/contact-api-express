@@ -1,5 +1,6 @@
 import { validate } from "../validation/validation.js";
 import {
+  deleteUserValidation,
   getUserValidation,
   loginUserValidation,
   registerUserValidation,
@@ -123,9 +124,26 @@ const update = async (request) => {
   });
 };
 
+const logout = async (username) => {
+  username = validate(getUserValidation, username);
+  const user = await get(username);
+  return prismaClient.user.update({
+    where: {
+      username: user.username,
+    },
+    data: {
+      token: null,
+    },
+    select: {
+      username: true,
+    },
+  });
+};
+
 export default {
   register,
   login,
   get,
   update,
+  logout,
 };
