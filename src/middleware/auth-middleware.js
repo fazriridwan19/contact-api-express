@@ -1,4 +1,4 @@
-import { prismaClient } from "../app/database";
+import { prismaClient } from "../app/database.js";
 import { logger } from "../app/logging.js";
 
 export const authMiddleware = async (req, res, next) => {

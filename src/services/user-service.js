@@ -1,6 +1,5 @@
 import { validate } from "../validation/validation.js";
 import {
-  deleteUserValidation,
   getUserValidation,
   loginUserValidation,
   registerUserValidation,
